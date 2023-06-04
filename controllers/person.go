@@ -1,7 +1,9 @@
-package main
+package controllers
 
 import (
-	"github.com/Rade1210/go_rest_mongo_db/controllers"
+	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,8 +24,11 @@ type Address struct {
 	Country string `json:"country"`
 }
 
-func main() {
-	router := gin.Default() // Address: localhost:8080
-	router.POST("/postPerson", controllers.CreatePerson)
-	router.Run()
+func CreatePerson(ct *gin.Context){
+	var person Person
+		if err := ct.BindJSON(&person); err != nil {
+			ct.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Please provide the details in accepted format"})
+		}
+		fmt.Println(person)
+		ct.IndentedJSON(http.StatusCreated, gin.H{"message":"Creation Successful"})
 }
