@@ -1,26 +1,28 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
+	"github.com/Rade1210/go_rest_mongo_db/database"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Person struct {
-	FirstName string `json:"firstName"`
-	LastName string `json:"lastName"`
-	PhoneNumber string `json:"phoneNumber"`
-	Address Address `json:"address"`
-	EmailAddress string `json:"emailAddress"`
+	Id string `json:"id" bson:"_id"`
+	FirstName string `json:"firstName" bson:"firstName"`
+	LastName string `json:"lastName" bson:"lastName"`
+	PhoneNumber string `json:"phoneNumber" bson:"phoneNumber"`
+	Address Address `json:"address" bson:"address"`
+	EmailAddress string `json:"emailAddress" bson:"emailAddress"`
 }
 
 type Address struct {
-	AddressLine1 string `json:"addressLine1"`
-	AddressLine2 string `json:"addressLine2"`
-	City string `json:"city"`
-	State string `json:"state"`
-	ZipCode string `json:"zipCode"`
-	Country string `json:"country"`
+	AddressLine1 string `json:"addressLine1" bson:"addressLine1"`
+	AddressLine2 string `json:"addressLine2" bson:"addressLine2"`
+	City string `json:"city" bson:"city"`
+	State string `json:"state" bson:"state"`
+	ZipCode string `json:"zipCode" bson:"zipCode"`
+	Country string `json:"country" bson:"country"`
 }
 
 func CreatePerson(ct *gin.Context){
@@ -28,6 +30,31 @@ func CreatePerson(ct *gin.Context){
 		if err := ct.BindJSON(&person); err != nil {
 			ct.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Please provide the details in accepted format"})
 		}
-		fmt.Println(person)
-		ct.IndentedJSON(http.StatusCreated, gin.H{"message":"Creation Successful"})
+		SavePersonToDB(ct, person)
 }
+
+func GetPerson(ct *gin.Context) {
+	id := ct.Param("id")
+	db := database.New()
+	collection := db.Client.Database("go_rest_mongo_db").Collection("Person")
+
+	var result Person
+	filter := bson.D{{"_id", id}}
+	error := collection.FindOne(ct, filter).Decode(&result)
+	if error != nil {
+		ct.IndentedJSON(http.StatusNotFound, gin.H{"message":"Unable to find the person"})
+	}
+
+	ct.IndentedJSON(http.StatusOK, result)
+}
+
+func SavePersonToDB(ct *gin.Context, PersonRecord Person) {
+	db := database.New()
+	collection := db.Client.Database("go_rest_mongo_db").Collection("Person")
+	response, insertError := collection.InsertOne(ct, PersonRecord)
+	if insertError != nil {
+		ct.IndentedJSON(http.StatusFailedDependency, gin.H{"message":"Unable to create Person in the database due to the internal failures"})
+	}
+
+	ct.IndentedJSON(http.StatusCreated, gin.H{"id": response.InsertedID})
+} 

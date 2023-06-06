@@ -14,7 +14,7 @@ type DatabaseConnection struct {
 	Ctx context.Context
 }
 
-var db *DatabaseConnection
+var db *DatabaseConnection // initially set to nill
 
 func New() *DatabaseConnection {
 	if db == nil {
