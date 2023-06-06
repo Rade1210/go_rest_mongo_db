@@ -9,5 +9,6 @@ func main() {
 	router := gin.Default() // Address: localhost:8080
 	router.POST("/postPerson", controllers.CreatePerson)
 	router.GET("/getPerson/:id", controllers.GetPerson)
+	router.DELETE("/deletePerson/:id", controllers.DeletePerson)
 	router.Run()
 }

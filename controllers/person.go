@@ -48,6 +48,21 @@ func GetPerson(ct *gin.Context) {
 	ct.IndentedJSON(http.StatusOK, result)
 }
 
+func DeletePerson(ct *gin.Context) {
+	id := ct.Param("id")
+	db := database.New()
+	collection := db.Client.Database("go_rest_mongo_db").Collection("Person")
+
+	filter := bson.D{{"_id", id}}
+
+	_, error := collection.DeleteOne(ct, filter)
+	if error != nil {
+		ct.IndentedJSON(http.StatusFailedDependency, gin.H{"message":"Unable to delete person from the records"})
+	}
+
+	ct.IndentedJSON(http.StatusAccepted, gin.H{"message":"Successfuly deleted the person"})
+}
+
 func SavePersonToDB(ct *gin.Context, PersonRecord Person) {
 	db := database.New()
 	collection := db.Client.Database("go_rest_mongo_db").Collection("Person")
