@@ -63,6 +63,31 @@ func DeletePerson(ct *gin.Context) {
 	ct.IndentedJSON(http.StatusAccepted, gin.H{"message":"Successfuly deleted the person"})
 }
 
+func UpdatePerson(ct *gin.Context) {
+	id := ct.Param("id")
+	db := database.New()
+	collection := db.Client.Database("go_rest_mongo_db").Collection("Person")
+
+	var person Person
+	if err := ct.BindJSON(&person); err != nil {
+		ct.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Please provide the details in accepted format"})
+	}
+
+	filter := bson.M{"_id": id}
+	updatePersonFirstName := bson.D{{
+		Key: "$set", Value: bson.D{{Key: "firstName", Value: person.FirstName}},
+	}}
+
+	_, error := collection.UpdateOne(ct, filter, updatePersonFirstName)
+	if error != nil {
+		ct.IndentedJSON(http.StatusFailedDependency, gin.H{"message":"Unable to update the person in the records"})
+	} else {
+		ct.IndentedJSON(http.StatusAccepted, gin.H{"message":"Successfuly updated the person in the records"})
+	}
+
+
+}
+
 func SavePersonToDB(ct *gin.Context, PersonRecord Person) {
 	db := database.New()
 	collection := db.Client.Database("go_rest_mongo_db").Collection("Person")

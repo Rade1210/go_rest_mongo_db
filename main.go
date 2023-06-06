@@ -10,5 +10,6 @@ func main() {
 	router.POST("/postPerson", controllers.CreatePerson)
 	router.GET("/getPerson/:id", controllers.GetPerson)
 	router.DELETE("/deletePerson/:id", controllers.DeletePerson)
+	router.PUT("/updatePerson/:id", controllers.UpdatePerson)
 	router.Run()
 }
