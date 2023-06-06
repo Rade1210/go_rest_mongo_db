@@ -74,11 +74,17 @@ func UpdatePerson(ct *gin.Context) {
 	}
 
 	filter := bson.M{"_id": id}
-	updatePersonFirstName := bson.D{{
-		Key: "$set", Value: bson.D{{Key: "firstName", Value: person.FirstName}},
-	}}
+	updatePerson := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "firstName", Value: person.FirstName},
+			{Key: "lastName", Value: person.LastName},
+			{Key: "phoneNumber", Value: person.PhoneNumber},
+			{Key: "address", Value: person.Address},
+			{Key: "emailAddress", Value: person.EmailAddress},
+		}},
+	}
 
-	_, error := collection.UpdateOne(ct, filter, updatePersonFirstName)
+	_, error := collection.UpdateOne(ct, filter, updatePerson)
 	if error != nil {
 		ct.IndentedJSON(http.StatusFailedDependency, gin.H{"message":"Unable to update the person in the records"})
 	} else {
